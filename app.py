@@ -18,15 +18,18 @@ try:
     df = load_data()
     
     # 提取日期欄位 (排除前面的基本資訊)
-    # 假設前三欄是 時間戳記、請提供中文姓名 及 英文稱呼 Please provide your name：、電話號碼
-    date_columns = [col for col in df.columns if '2026' in col]
-
-    # --- 側邊欄：自動識別姓名欄位 ---
-    st.sidebar.header("管理功能")
-    
-    # 自動尋找名稱包含 '姓名' 或 'name' 的欄位
+    # --- 自動識別欄位 ---
+    # 尋找包含「姓名」或 "name" 的欄位（解決標題過長問題）
     name_col = next((col for col in df.columns if '姓名' in col or 'name' in col.lower()), df.columns[1])
     
+    # 尋找包含「電話」的欄位
+    phone_col = next((col for col in df.columns if '電話' in col or 'Phone' in col), df.columns[2])
+    
+    # 提取所有包含 '2026' 的日期欄位
+    date_columns = [col for col in df.columns if '2026' in col]
+
+    # --- 側邊欄：導師搜尋 ---
+    st.sidebar.header("管理功能")
     all_tutors = df[name_col].dropna().unique()
     selected_tutor = st.sidebar.selectbox("🔍 搜尋導師紀錄", all_tutors)
 
@@ -37,16 +40,29 @@ try:
         st.subheader("選擇日期查看當天導師")
         target_date = st.selectbox("請選擇日期", date_columns)
         
-        # 篩選當天有填寫內容的導師
-        # 這裡的 '電話號碼' 如果也報錯，可以改成 df.columns[2] (即 C 欄)
-        phone_col = next((col for col in df.columns if '電話' in col or 'Phone' in col), df.columns[2])
-        
+        # 過濾當天有內容的人（排除空白）
         daily_attending = df[df[target_date].notna()][[name_col, phone_col, target_date]]
         daily_attending.columns = ['導師姓名', '電話', '報更時段/備註']
         
         if not daily_attending.empty:
             st.success(f"{target_date} 共有 {len(daily_attending)} 位導師")
             st.dataframe(daily_attending, use_container_width=True)
+        else:
+            st.info("當天暫時沒有導師報更。")
+            
+    with tab2:
+        st.subheader(f"{selected_tutor} 的報更詳情")
+        tutor_row = df[df[name_col] == selected_tutor]
+        # 整理該導師有報更的日期
+        tutor_schedule = []
+        for date in date_columns:
+            status = tutor_row[date].values[0]
+            if pd.notna(status):
+                tutor_schedule.append({"日期": date, "內容/時段": status})
+        
+        if tutor_schedule:
+            st.metric("本月總報更天數", len(tutor_schedule))
+            st.table(pd.DataFrame(tutor_schedule))
         
         # 整理該導師有報更的日期
         tutor_schedule = []
