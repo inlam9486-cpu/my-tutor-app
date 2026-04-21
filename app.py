@@ -5,16 +5,16 @@ import pandas as pd
 st.set_page_config(page_title="惇裕小學 5月報更管理", layout="wide")
 st.title("🏫 惇裕小學 - 5月導師報更看板")
 
-# 2. 數據讀取 (已針對你的試算表 ID 和 GID 優化)
-SHEET_ID = "https://docs.google.com/spreadsheets/d/1uqDMMCinyvsSdXAYE1Dh0EZ36qVvrzhKftNHf_-vw7w/edit?gid=997998162#gid=997998162"
-GID = "997998162"
+# 這裡直接使用你提供的試算表 ID 和正確的頁籤 GID
+SHEET_ID = "https://docs.google.com/spreadsheets/d/1uqDMMCinyvsSdXAYE1Dh0EZ36qVvrzhKftNHf_-vw7w/edit?usp=sharing"
+GID = "997998162" # 這是 5月報更 Report (回覆) 的分頁 ID
 csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={GID}"
 
 @st.cache_data(ttl=60)
 def load_data():
+    # 加入這行來確保能正確下載 CSV
     df = pd.read_csv(csv_url)
     return df
-
 try:
     df = load_data()
     
