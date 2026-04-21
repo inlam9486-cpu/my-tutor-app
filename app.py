@@ -18,12 +18,12 @@ try:
     df = load_data()
     
     # 提取日期欄位 (排除前面的基本資訊)
-    # 假設前三欄是 時間戳記、中文姓名、電話號碼
+    # 假設前三欄是 時間戳記、請提供中文姓名 及 英文稱呼 Please provide your name：、電話號碼
     date_columns = [col for col in df.columns if '2026' in col]
 
     # --- 側邊欄：導師搜尋 ---
     st.sidebar.header("管理功能")
-    all_tutors = df['中文姓名'].dropna().unique()
+    all_tutors = df['請提供中文姓名 及 英文稱呼 Please provide your name：'].dropna().unique()
     selected_tutor = st.sidebar.selectbox("🔍 搜尋導師紀錄", all_tutors)
 
     # --- 主畫面：兩種檢視模式 ---
