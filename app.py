@@ -7,7 +7,7 @@ st.title("🏫 惇裕小學 - 5月導師報更看板")
 
 # 這裡直接使用你提供的試算表 ID 和正確的頁籤 GID
 SHEET_ID = "1uqDMMCinyvsSdXAYE1Dh0EZ36qVvrzhKftNHf_-vw7w"
-GID = "997998162" # 這是 5月報更 Report (回覆) 的分頁 ID
+GID = "997998162" 
 csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={GID}"
 
 @st.cache_data(ttl=60)
