@@ -50,19 +50,9 @@ try:
         else:
             st.info("當天暫時沒有導師報更。")
             
-    with tab2:
+with tab2:
         st.subheader(f"{selected_tutor} 的報更詳情")
         tutor_row = df[df[name_col] == selected_tutor]
-        # 整理該導師有報更的日期
-        tutor_schedule = []
-        for date in date_columns:
-            status = tutor_row[date].values[0]
-            if pd.notna(status):
-                tutor_schedule.append({"日期": date, "內容/時段": status})
-        
-        if tutor_schedule:
-            st.metric("本月總報更天數", len(tutor_schedule))
-            st.table(pd.DataFrame(tutor_schedule))
         
         # 整理該導師有報更的日期
         tutor_schedule = []
@@ -72,7 +62,12 @@ try:
                 tutor_schedule.append({"日期": date, "內容/時段": status})
         
         if tutor_schedule:
-            st.metric("本月總報更天數", len(tutor_schedule))
+            # 使用兩欄佈局，讓數據更美觀
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("本月總報更天數", len(tutor_schedule))
+            
+            # 僅顯示一次表格
             st.table(pd.DataFrame(tutor_schedule))
         else:
             st.warning("該導師本月尚未有報更紀錄。")
