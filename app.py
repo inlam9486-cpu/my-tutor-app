@@ -5,11 +5,10 @@ import pandas as pd
 st.set_page_config(page_title="惇裕小學 5月報更管理", layout="wide")
 st.title("🏫 惇裕小學 - 5月導師報更看板")
 
-# 這裡直接使用你提供的試算表 ID 和正確的頁籤 GID
+# 這裡只需要 ID，不要完整網址
 SHEET_ID = "1uqDMMCinyvsSdXAYE1Dh0EZ36qVvrzhKftNHf_-vw7w"
 GID = "997998162" 
 csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={GID}"
-
 @st.cache_data(ttl=60)
 def load_data():
     # 加入這行來確保能正確下載 CSV
