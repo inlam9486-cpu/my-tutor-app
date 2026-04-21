@@ -5,27 +5,22 @@ import pandas as pd
 st.set_page_config(page_title="惇裕小學 5月報更管理", layout="wide")
 st.title("🏫 惇裕小學 - 5月導師報更看板")
 
-# 這裡只需要 ID，不要完整網址
+# 2. 數據讀取
 SHEET_ID = "1uqDMMCinyvsSdXAYE1Dh0EZ36qVvrzhKftNHf_-vw7w"
-GID = "997998162" 
+GID = "997998162"
 csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={GID}"
+
 @st.cache_data(ttl=60)
 def load_data():
-    # 加入這行來確保能正確下載 CSV
     df = pd.read_csv(csv_url)
     return df
+
 try:
     df = load_data()
     
-    # 提取日期欄位 (排除前面的基本資訊)
-    # --- 自動識別欄位 ---
-    # 尋找包含「姓名」或 "name" 的欄位（解決標題過長問題）
+    # 自動識別欄位
     name_col = next((col for col in df.columns if '姓名' in col or 'name' in col.lower()), df.columns[1])
-    
-    # 尋找包含「電話」的欄位
     phone_col = next((col for col in df.columns if '電話' in col or 'Phone' in col), df.columns[2])
-    
-    # 提取所有包含 '2026' 的日期欄位
     date_columns = [col for col in df.columns if '2026' in col]
 
     # --- 側邊欄：導師搜尋 ---
@@ -33,14 +28,12 @@ try:
     all_tutors = df[name_col].dropna().unique()
     selected_tutor = st.sidebar.selectbox("🔍 搜尋導師紀錄", all_tutors)
 
-    # --- 主畫面：兩種檢視模式 ---
+    # --- 主畫面 ---
     tab1, tab2 = st.tabs(["🗓️ 每日報更概覽", "👤 導師個人統計"])
 
     with tab1:
         st.subheader("選擇日期查看當天導師")
         target_date = st.selectbox("請選擇日期", date_columns)
-        
-        # 過濾當天有內容的人（排除空白）
         daily_attending = df[df[target_date].notna()][[name_col, phone_col, target_date]]
         daily_attending.columns = ['導師姓名', '電話', '報更時段/備註']
         
@@ -49,12 +42,10 @@ try:
             st.dataframe(daily_attending, use_container_width=True)
         else:
             st.info("當天暫時沒有導師報更。")
-            
-with tab2:
+
+    with tab2:
         st.subheader(f"{selected_tutor} 的報更詳情")
         tutor_row = df[df[name_col] == selected_tutor]
-        
-        # 整理該導師有報更的日期
         tutor_schedule = []
         for date in date_columns:
             status = tutor_row[date].values[0]
@@ -62,15 +53,10 @@ with tab2:
                 tutor_schedule.append({"日期": date, "內容/時段": status})
         
         if tutor_schedule:
-            # 使用兩欄佈局，讓數據更美觀
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("本月總報更天數", len(tutor_schedule))
-            
-            # 僅顯示一次表格
+            st.metric("本月總報更天數", len(tutor_schedule))
             st.table(pd.DataFrame(tutor_schedule))
         else:
             st.warning("該導師本月尚未有報更紀錄。")
 
 except Exception as e:
-    st.error("讀取試算表失敗，請確保該 Google 試算表已開啟「知道連結的人即可檢視」權限。")
+    st.error("讀取試算表失敗，請確保 Google 試算表權限已設為「知道連結的人即可檢視」。")
